@@ -1,0 +1,41 @@
+---
+// Landing page — tiny, zero JS, zero dependencies
+---
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>weather-lite</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:monospace;max-width:600px;margin:0 auto;padding:2rem;background:#111;color:#eee;line-height:1.6}
+h1{margin-bottom:1rem;font-size:1.2rem}
+code{background:#222;padding:2px 4px;border-radius:2px;font-size:13px}
+ul{margin:.5rem 0 .5rem 1.5rem}
+li{margin:.3rem 0}
+.meta{margin-top:2rem;font-size:11px;color:#666;border-top:1px solid #333;padding-top:.5rem}
+a{color:#6cf}
+</style>
+</head>
+<body>
+<h1>weather-lite</h1>
+<p>Low-bandwidth weather. Zero client JS. SSR only.</p>
+
+<h2 style="margin-top:1rem;font-size:1rem">Usage</h2>
+<p>Provide <code>lat</code> and <code>lon</code> as query params.</p>
+<ul>
+<li><a href="/weather?lat=48.14&lon=11.58">/weather?lat=48.14&lon=11.58</a> — normal (&lt;5KB)</li>
+<li><a href="/weather/min?lat=48.14&lon=11.58">/weather/min?lat=48.14&lon=11.58</a> — minimum (&lt;1KB)</li>
+<li><a href="/weather/text?lat=48.14&lon=11.58">/weather/text?lat=48.14&lon=11.58</a> — plain text</li>
+</ul>
+
+<h2 style="margin-top:1rem;font-size:1rem">Modes</h2>
+<ul>
+<li><strong>normal</strong> — tiny inline CSS, ASCII art, payload metrics</li>
+<li><strong>min</strong> — no CSS, no JS, smallest useful response</li>
+<li><strong>text</strong> — plain text, Content-Type: text/plain</li>
+</ul>
+
+<p class="meta">Data: <a href="https://open-meteo.com">Open-Meteo</a> (free, no API key) · Cache: 10min TTL · Zero tracking</p>
+</body>
+</html>

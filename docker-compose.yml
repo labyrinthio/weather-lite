@@ -1,0 +1,19 @@
+services:
+  weather-lite:
+    build: .
+    container_name: weather-lite
+    restart: unless-stopped
+    networks:
+      - caddy-net
+    environment:
+      - HOST=0.0.0.0
+      - PORT=4321
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:4321/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+networks:
+  caddy-net:
+    external: true

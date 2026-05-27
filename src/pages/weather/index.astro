@@ -1,0 +1,48 @@
+---
+// Normal mode — tiny inline CSS, ASCII art, payload metrics
+// Returns full HTML response. Target: <5KB uncompressed.
+import { parseCoords, getWeather } from '../../lib/routes';
+import { formatNormal } from '../../lib/formatter';
+import { startTimer } from '../../lib/metrics';
+
+const totalTimer = startTimer();
+const url = new URL(Astro.request.url);
+const { lat, lon, error } = parseCoords(url);
+
+if (error) {
+  return new Response(`<!DOCTYPE html><html><body><pre>Error: ${error}\n\nUsage: /weather?lat=48.14&lon=11.58</pre></body></html>`, {
+    status: 400,
+    headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
+  });
+}
+
+try {
+  const weatherTimer = startTimer();
+  const { data, cacheHit } = await getWeather(lat, lon);
+  const weatherApiMs = data.apiLatencyMs;
+
+  const renderTimer = startTimer();
+  const html = formatNormal(data, { totalMs: 0, weatherApiMs, cacheHit, renderMs: 0 });
+  const renderMs = renderTimer();
+
+  const totalMs = totalTimer();
+  const finalHtml = formatNormal(data, { totalMs, weatherApiMs, cacheHit, renderMs });
+  const payloadBytes = new TextEncoder().encode(finalHtml).length;
+
+  return new Response(finalHtml, {
+    status: 200,
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+      'X-Payload-Size': payloadBytes.toString(),
+      'X-Cache-Status': cacheHit ? 'hit' : 'miss',
+      'X-Render-Time': `${totalMs}ms`,
+      'Cache-Control': 'public, max-age=300',
+    },
+  });
+} catch (err: any) {
+  return new Response(`<!DOCTYPE html><html><body><pre>Weather service unavailable: ${err.message}</pre></body></html>`, {
+    status: 502,
+    headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
+  });
+}
+---

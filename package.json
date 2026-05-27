@@ -1,0 +1,22 @@
+{
+  "name": "weather-lite",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Low-bandwidth weather app — SSR, zero client JS, <5KB responses",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "start": "node dist/server/entry.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "astro": "^6.3.0",
+    "@astrojs/node": "^10.0.0"
+  },
+  "devDependencies": {
+    "vitest": "^3.1.0",
+    "typescript": "^5.7.0"
+  }
+}
