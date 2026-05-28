@@ -1,35 +1,37 @@
 ---
 // Normal mode — tiny inline CSS, ASCII art, payload metrics
-// Returns full HTML response. Target: <5KB uncompressed.
-import { parseCoords, getWeather } from '../../lib/routes';
+import { resolveLocation, getWeather } from '../../lib/routes';
 import { formatNormal } from '../../lib/formatter';
 import { startTimer } from '../../lib/metrics';
 
 const totalTimer = startTimer();
 const url = new URL(Astro.request.url);
-const { lat, lon, error } = parseCoords(url);
+const location = await resolveLocation(url);
 
-if (error) {
-  return new Response(`<!DOCTYPE html><html><body><pre>Error: ${error}\n\nUsage: /weather?lat=48.14&lon=11.58</pre></body></html>`, {
+if (location.error) {
+  return new Response(`<!DOCTYPE html><html><body><pre>Error: ${location.error}\n\nUsage: /weather?city=Munich or /weather?lat=48.14&lon=11.58</pre></body></html>`, {
     status: 400,
     headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
   });
 }
 
 try {
-  const weatherTimer = startTimer();
-  const { data, cacheHit } = await getWeather(lat, lon);
-  const weatherApiMs = data.apiLatencyMs;
-
   const renderTimer = startTimer();
-  const html = formatNormal(data, { totalMs: 0, weatherApiMs, cacheHit, renderMs: 0 });
+  const { data, cacheHit } = await getWeather(location.lat, location.lon);
+  const weatherApiMs = data.apiLatencyMs;
   const renderMs = renderTimer();
-
   const totalMs = totalTimer();
-  const finalHtml = formatNormal(data, { totalMs, weatherApiMs, cacheHit, renderMs });
-  const payloadBytes = new TextEncoder().encode(finalHtml).length;
 
-  return new Response(finalHtml, {
+  let html = formatNormal(data, { totalMs, weatherApiMs, cacheHit, renderMs });
+
+  // Inject "set as my location" button before </body>
+  const locationName = location.name || `${location.lat},${location.lon}`;
+  const saveSnippet = `<div style="margin-top:.5rem;font-size:11px"><button id="set-home" style="display:none;background:none;border:none;color:#6cf;font-family:monospace;font-size:11px;cursor:pointer;padding:0">📌 set as my location</button> <a href="/utils" style="color:#666;text-decoration:none;font-size:11px">utils</a></div><script>document.getElementById('set-home').style.display='';document.getElementById('set-home').onclick=function(){localStorage.setItem('weather-lite:home',JSON.stringify({lat:${location.lat},lon:${location.lon},name:'${locationName.replace(/'/g, "\\'")}'}}));this.textContent='✓ saved';};</script>`;
+  html = html.replace('</body>', saveSnippet + '</body>');
+
+  const payloadBytes = new TextEncoder().encode(html).length;
+
+  return new Response(html, {
     status: 200,
     headers: {
       'Content-Type': 'text/html; charset=utf-8',

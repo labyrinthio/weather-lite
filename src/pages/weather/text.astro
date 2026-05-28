@@ -1,22 +1,22 @@
 ---
 // Plain text mode — Content-Type: text/plain
-import { parseCoords, getWeather } from '../../lib/routes';
+import { resolveLocation, getWeather } from '../../lib/routes';
 import { formatText } from '../../lib/formatter';
 import { startTimer } from '../../lib/metrics';
 
 const totalTimer = startTimer();
 const url = new URL(Astro.request.url);
-const { lat, lon, error } = parseCoords(url);
+const location = await resolveLocation(url);
 
-if (error) {
-  return new Response(`Error: ${error}\n\nUsage: /weather/text?lat=48.14&lon=11.58`, {
+if (location.error) {
+  return new Response(`Error: ${location.error}\n\nUsage: /weather/text?city=Munich or /weather/text?lat=48.14&lon=11.58`, {
     status: 400,
     headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' },
   });
 }
 
 try {
-  const { data, cacheHit } = await getWeather(lat, lon);
+  const { data, cacheHit } = await getWeather(location.lat, location.lon);
   const totalMs = totalTimer();
 
   const text = formatText(data);

@@ -1,0 +1,83 @@
+---
+// Utilities page — location management and future settings
+---
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>weather-lite — utils</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:monospace;max-width:600px;margin:0 auto;padding:2rem;background:#111;color:#eee;line-height:1.6}
+h1{font-size:1.2rem;margin-bottom:.5rem}
+h2{font-size:1rem;margin-top:1.5rem;margin-bottom:.5rem;color:#aaa}
+form{margin:1rem 0;display:flex;gap:.5rem}
+input[type=text]{flex:1;padding:.4rem .6rem;background:#222;color:#eee;border:1px solid #444;font-family:monospace;font-size:14px;border-radius:2px}
+button{padding:.4rem .8rem;background:#333;color:#eee;border:1px solid #555;font-family:monospace;font-size:14px;cursor:pointer;border-radius:2px}
+button:hover{background:#444}
+.meta{margin-top:2rem;font-size:11px;color:#666;border-top:1px solid #333;padding-top:.5rem}
+a{color:#6cf}
+#geolocate{display:none;margin-top:.5rem}
+#current{color:#6cf}
+#clear{display:none;margin-top:.5rem}
+#saved{display:none;color:#6f6;font-size:12px;margin-top:.25rem}
+</style>
+</head>
+<body>
+<h1><a href="/" style="color:#eee;text-decoration:none">weather-lite</a> / utils</h1>
+
+<h2>Saved Location</h2>
+<div id="current-wrap">
+  <span id="current">none</span>
+  <button id="clear">clear</button>
+  <div id="saved"></div>
+</div>
+
+<h2>Set Location</h2>
+<form id="search-form" action="/weather" method="get">
+  <input type="text" name="city" placeholder="City or postal code">
+  <button type="submit">go</button>
+</form>
+<button id="geolocate">📍 use my location</button>
+
+<p class="meta">
+  <a href="/">home</a> ·
+  Saved locations are stored in your browser only.
+</p>
+
+<script>
+(function(){
+  var home=localStorage.getItem('weather-lite:home');
+  if(home){
+    var loc=JSON.parse(home);
+    document.getElementById('current').textContent=loc.name||(loc.lat+','+loc.lon);
+    document.getElementById('clear').style.display='';
+  }
+  document.getElementById('clear').onclick=function(){
+    localStorage.removeItem('weather-lite:home');
+    document.getElementById('current').textContent='none';
+    document.getElementById('clear').style.display='none';
+    document.getElementById('saved').style.display='none';
+    document.getElementById('saved').textContent='';
+  };
+  document.getElementById('geolocate').style.display='';
+  document.getElementById('geolocate').onclick=function(){
+    navigator.geolocation.getCurrentPosition(
+      function(p){
+        var lat=p.coords.latitude.toFixed(4),lon=p.coords.longitude.toFixed(4);
+        localStorage.setItem('weather-lite:home',JSON.stringify({lat:parseFloat(lat),lon:parseFloat(lon),name:''}));
+        window.location='/weather?lat='+lat+'&lon='+lon;
+      },
+      function(){}
+    );
+  };
+  document.getElementById('search-form').onsubmit=function(e){
+    var city=this.querySelector('[name=city]').value.trim();
+    if(city){
+      localStorage.setItem('weather-lite:home',JSON.stringify({lat:0,lon:0,name:city}));
+    }
+  };
+})();
+</script>
+</body>
+</html>
