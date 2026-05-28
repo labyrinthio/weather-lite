@@ -18,6 +18,12 @@ if (location.error) {
 try {
   const renderTimer = startTimer();
   const { data, cacheHit } = await getWeather(location.lat, location.lon);
+
+  // Override location with resolved name if geocoded
+  if (location.name) {
+    data.location = location.name;
+  }
+
   const weatherApiMs = data.apiLatencyMs;
   const renderMs = renderTimer();
   const totalMs = totalTimer();

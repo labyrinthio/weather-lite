@@ -72,10 +72,7 @@ a{color:#6cf}
     );
   };
   document.getElementById('search-form').onsubmit=function(e){
-    var city=this.querySelector('[name=city]').value.trim();
-    if(city){
-      localStorage.setItem('weather-lite:home',JSON.stringify({lat:0,lon:0,name:city}));
-    }
+    // Don't save here — weather page will save with resolved name
   };
 })();
 </script>

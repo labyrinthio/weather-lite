@@ -17,6 +17,12 @@ if (location.error) {
 
 try {
   const { data, cacheHit } = await getWeather(location.lat, location.lon);
+
+  // Override location with resolved name if geocoded
+  if (location.name) {
+    data.location = location.name;
+  }
+
   const totalMs = totalTimer();
 
   const text = formatText(data);

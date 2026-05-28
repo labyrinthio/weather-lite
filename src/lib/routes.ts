@@ -52,7 +52,7 @@ export async function resolveLocation(url: URL): Promise<LocationParams & { geoc
   const geoCacheKey = `geo:${city.toLowerCase()}`;
   const cached = cacheGet<LocationResult>(geoCacheKey, 24 * 60 * 60 * 1000); // 24h TTL
   if (cached) {
-    return { lat: cached.data.lat, lon: cached.data.lon, name: cached.data.name, geocoded: cached.data };
+    return { lat: cached.data.lat, lon: cached.data.lon, name: buildDisplayName(cached.data), geocoded: cached.data };
   }
 
   // Geocode
@@ -63,7 +63,15 @@ export async function resolveLocation(url: URL): Promise<LocationParams & { geoc
   }
 
   cacheSet(geoCacheKey, best);
-  return { lat: best.lat, lon: best.lon, name: best.name, geocoded: best };
+  return { lat: best.lat, lon: best.lon, name: buildDisplayName(best), geocoded: best };
+}
+
+// Build "Springfield, Missouri, US" from geocoded result
+export function buildDisplayName(loc: LocationResult): string {
+  const parts = [loc.name];
+  if (loc.admin1 && loc.admin1 !== loc.name) parts.push(loc.admin1);
+  if (loc.country_code) parts.push(loc.country_code);
+  return parts.join(', ');
 }
 
 export async function getWeather(lat: number, lon: number): Promise<{ data: WeatherData; cacheHit: boolean }> {
