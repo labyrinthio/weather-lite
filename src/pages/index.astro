@@ -1,5 +1,5 @@
 ---
-// Landing page — search form, geolocate button, link to utils
+// Landing page — doorway only
 ---
 <html lang="en">
 <head>
@@ -10,39 +10,26 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:monospace;max-width:600px;margin:0 auto;padding:2rem;background:#111;color:#eee;line-height:1.6}
 h1{margin-bottom:1rem;font-size:1.2rem}
-form{margin:1rem 0;display:flex;gap:.5rem}
-input[type=text]{flex:1;padding:.4rem .6rem;background:#222;color:#eee;border:1px solid #444;font-family:monospace;font-size:14px;border-radius:2px}
-button{padding:.4rem .8rem;background:#333;color:#eee;border:1px solid #555;font-family:monospace;font-size:14px;cursor:pointer;border-radius:2px}
-button:hover{background:#444}
-.meta{margin-top:2rem;font-size:11px;color:#666;border-top:1px solid #333;padding-top:.5rem}
+ul{list-style:none;margin:1rem 0}
+li{margin:.5rem 0}
 a{color:#6cf}
-#geolocate{display:none;margin-top:.5rem}
+.meta{margin-top:2rem;font-size:11px;color:#666;border-top:1px solid #333;padding-top:.5rem}
 </style>
 </head>
 <body>
 <h1>weather-lite</h1>
 <p>Low-bandwidth weather. Zero client JS required.</p>
 
-<form action="/weather" method="get">
-  <input type="text" name="city" placeholder="City or postal code" autofocus>
-  <button type="submit">go</button>
-</form>
-<button id="geolocate">📍 use my location</button>
+<ul>
+  <li><a href="/weather">normal</a> — full forecast</li>
+  <li><a href="/weather/min">min</a> — essentials only</li>
+  <li><a href="/weather/text">text</a> — plain text</li>
+</ul>
 
 <p class="meta">
   <a href="/utils">utils</a> ·
   Data: <a href="https://open-meteo.com">Open-Meteo</a> (free) ·
   Cache: 10min · Zero tracking
 </p>
-
-<script>
-document.getElementById('geolocate').style.display='';
-document.getElementById('geolocate').onclick=function(){
-  navigator.geolocation.getCurrentPosition(
-    function(p){window.location='/weather?lat='+p.coords.latitude.toFixed(4)+'&lon='+p.coords.longitude.toFixed(4)},
-    function(){}
-  );
-};
-</script>
 </body>
 </html>
